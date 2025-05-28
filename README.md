@@ -1,16 +1,10 @@
 # YouTube Transcript Processor
 
-A Python application for processing and analyzing YouTube video transcripts.
-
-## Overview
-
-This project allows you to extract, process, and analyze transcripts from YouTube videos. It provides utilities for downloading transcripts, analyzing content, and generating insights from the text data.
+A Python application for getting YouTube video transcripts.
 
 ## Features
 
 - YouTube transcript extraction
-- Text processing and analysis
-- Simple interface for working with transcript data
 
 ## Getting Started
 
@@ -23,7 +17,7 @@ This project allows you to extract, process, and analyze transcripts from YouTub
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/yt-transcript.git
+git clone https://github.com/helinchooi/yt-transcript.git
 cd yt-transcript
 ```
 
@@ -58,7 +52,3 @@ pip install -r requirements-dev.txt  # If applicable
 ```bash
 python youtube-transcript.py
 ```
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
