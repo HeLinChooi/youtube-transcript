@@ -54,7 +54,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements-dev.txt  # If applicable
 ```
 
-3. Run the application
+3. Run the application, you will be prompted to enter a YouTube video URL or ID
 ```bash
 python youtube-transcript.py
 ```
