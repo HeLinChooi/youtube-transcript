@@ -1,0 +1,8 @@
+venv/
+*.txt
+!requirements.txt
+.vscode/
+.git/
+__pycache__/
+*.pyc
+youtube-transcript.py

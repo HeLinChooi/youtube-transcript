@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Transcript Extractor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-secondary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+        }
+
+        .result.active {
+            display: block;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .result-header h2 {
+            color: #333;
+            font-size: 1.3em;
+        }
+
+        .video-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .video-link:hover {
+            text-decoration: underline;
+        }
+
+        .transcript-box {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            line-height: 1.8;
+            color: #333;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .error {
+            display: none;
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .error.active {
+            display: block;
+        }
+
+        .info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: #1565C0;
+        }
+
+        .info strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>YouTube Transcript Extractor</h1>
+            <p class="subtitle">Get transcripts from any YouTube video instantly</p>
+
+            <div class="info">
+                <strong>How to use:</strong>
+                Paste a YouTube URL or video ID and click "Get Transcript". Works with videos that have captions available.
+            </div>
+
+            <div class="error" id="error"></div>
+
+            <div class="input-group">
+                <label for="videoUrl">YouTube URL or Video ID</label>
+                <input
+                    type="text"
+                    id="videoUrl"
+                    placeholder="https://www.youtube.com/watch?v=... or video ID"
+                    autocomplete="off"
+                >
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" id="fetchBtn" onclick="fetchTranscript()">
+                    Get Transcript
+                </button>
+                <button class="btn-secondary" id="downloadBtn" onclick="downloadTranscript()" disabled>
+                    Download as TXT
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Fetching transcript...</p>
+            </div>
+        </div>
+
+        <div class="card result" id="result">
+            <div class="result-header">
+                <h2>Transcript</h2>
+                <a href="#" class="video-link" id="videoLink" target="_blank">Open Video</a>
+            </div>
+            <div class="transcript-box" id="transcript"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentTranscript = '';
+        let currentVideoId = '';
+
+        async function fetchTranscript() {
+            const videoUrl = document.getElementById('videoUrl').value.trim();
+            const errorDiv = document.getElementById('error');
+            const loadingDiv = document.getElementById('loading');
+            const resultDiv = document.getElementById('result');
+            const fetchBtn = document.getElementById('fetchBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            if (!videoUrl) {
+                showError('Please enter a YouTube URL or video ID');
+                return;
+            }
+
+            // Hide error and result
+            errorDiv.classList.remove('active');
+            resultDiv.classList.remove('active');
+
+            // Show loading
+            loadingDiv.classList.add('active');
+            fetchBtn.disabled = true;
+            downloadBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/transcript', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ video_url: videoUrl })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to fetch transcript');
+                }
+
+                currentTranscript = data.transcript;
+                currentVideoId = data.video_id;
+
+                // Display result
+                document.getElementById('transcript').textContent = data.transcript;
+                document.getElementById('videoLink').href = `https://www.youtube.com/watch?v=${data.video_id}`;
+                resultDiv.classList.add('active');
+                downloadBtn.disabled = false;
+
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                loadingDiv.classList.remove('active');
+                fetchBtn.disabled = false;
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('active');
+        }
+
+        function downloadTranscript() {
+            if (!currentTranscript) return;
+
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            const content = `YouTube Video ID: ${currentVideoId}\nYouTube Link: https://www.youtube.com/watch?v=${currentVideoId}\n\n${currentTranscript}`;
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `transcript-${timestamp}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('videoUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                fetchTranscript();
+            }
+        });
+    </script>
+</body>
+</html>
